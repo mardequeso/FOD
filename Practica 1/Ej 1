@@ -1,0 +1,24 @@
+{1. Realizar un algoritmo que cree un archivo de números enteros no ordenados y permita incorporar datos al archivo. Los números son ingresados desde teclado. La carga
+finaliza cuando se ingresa el número 30000, que no debe incorporarse al archivo. El nombre del archivo debe ser proporcionado por el usuario desde teclado.}
+program creacion_archivo;
+const corte = 30000;
+type
+	archivo = file of integer;
+var
+	arc_log : archivo;
+	arc_fisico: string[10];
+	n: integer;
+begin
+	write('Ingrese nombre del archivo ');
+	readln(arc_fisico);
+	assign(arc_log,arc_fisico);
+	rewrite(arc_log);
+	write('Ingrese un número: ');
+	readln(n);
+	while (n <> corte) do begin
+		write(arc_log,n);
+		write('Ingrese un número o 30000 para terminar: ');
+		readln(n);
+	end;
+	close(arc_log);
+end.
