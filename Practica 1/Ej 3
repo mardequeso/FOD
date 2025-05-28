@@ -1,0 +1,125 @@
+{3. Realizar un programa que presente un menú con opciones para:
+a. Crear un archivo de registros no ordenados de empleados y completarlo con datos ingresados desde teclado. De cada empleado se registra: número de empleado,
+apellido, nombre, edad y DNI. Algunos empleados se ingresan con DNI 00. La carga finaliza cuando se ingresa el String ‘fin’ como apellido.
+b. Abrir el archivo anteriormente generado y:
+i. Listar en pantalla los datos de empleados que tengan un nombre o apellido determinado, el cual se proporciona desde el teclado.
+ii. Listar en pantalla los empleados de a uno por línea.
+iii. Listar en pantalla los empleados mayores de 70 años, próximos a jubilarse.
+NOTA: El nombre del archivo a crear o utilizar debe ser proporcionado por el usuario.}
+program creacion_archivo;
+const
+	corte = 'fin';
+type
+	empleado = record
+		id: integer;
+		ap: string[30];
+		nom: string [30];
+		edad: integer;
+		DNI: string[10];
+	end;
+	archivo = file of empleado;
+procedure leer(var e: empleado);
+begin
+	write('Ingrese nuevo apellido o fin para terminar con el registro de empleados: ');
+	readln(e.ap);
+	if(e.ap <> corte) then begin
+		write('Ingrese el id: ');
+		readln(e.id);
+		write('Ingrese el nombre: ');
+		readln(e.nom);
+		write('Ingrese la edad: ');
+		readln(e.edad);
+		write('Ingrese el DNI: ');
+		readln(e.DNI);
+	end;
+end;
+procedure crearArchivo (var arc_log: archivo);
+var
+	e: empleado;
+	arc_fis: string[10];
+begin
+	write('Ingrese nombre del archivo de empleados: ');
+	readln(arc_fis);
+	assign(arc_log,arc_fis);
+	rewrite(arc_log);
+	leer(e);
+	while(e.ap <> corte) do begin
+		write(arc_log,e);
+		leer(e);
+	end;
+	close(arc_log);
+end;
+procedure imprimir(e: empleado);
+begin
+	write('ID: ', e.id);
+	write(', Apellido: ', e.ap);
+	write(', Nombre: ', e.nom);
+	write(', Edad: ', e.edad);
+	writeln(', DNI: ', e.DNI);
+end;
+procedure ListarTodos(var arc_log: archivo);
+var
+	e: empleado;
+	arc_fis: string[10];
+begin
+	write('Ingrese nombre del archivo de empleados: ');
+	readln(arc_fis);
+	assign(arc_log,arc_fis);
+	reset(arc_log);
+	writeln('Listado de todos los empleados: ');
+	while not(EOF(arc_log)) do begin
+		read(arc_log,e);
+		imprimir(e);
+	end;
+	close(arc_log);
+end;
+procedure BuscarNomAp(var arc_log: archivo);
+var
+	arc_fis: string[10];
+	valor: string[30];
+	e: empleado;
+begin
+	write('Ingrese nombre del archivo de empleados: ');
+	readln(arc_fis);
+	assign(arc_log,arc_fis);
+	reset(arc_log);
+	write('Ingrese nombre o apellido a buscar: ');
+	readln(valor);
+	writeln('Listado de empleados con dicho nombre/apellido: ');
+	while not(EOF(arc_log)) do begin
+		read(arc_log,e);
+		if((e.nom = valor) or (e.ap = valor)) then imprimir(e);
+	end;
+	close(arc_log);
+end;
+procedure BuscarMayores(var arc_log: archivo);
+var
+	arc_fis: string[10];
+	e: empleado;
+begin
+	write('Ingrese nombre del archivo de empleados: ');
+	readln(arc_fis);
+	assign(arc_log,arc_fis);
+	reset(arc_log);
+	writeln('Listado de empleados mayores de 70: ');
+	while not(EOF(arc_log)) do begin
+		read(arc_log,e);
+		if(e.edad < 70) then imprimir(e);
+	end;
+	close(arc_log);
+end;
+var
+	arc_log: archivo;
+	n: integer;
+begin
+	write('Bienvenido. ');
+	repeat begin
+		writeln('Para crear un archivo seleccione 1. Para listar empleados con un nombre/apellido específico seleccione 2. Para listar todos los empleados seleccione 3. Para listar todos los empleados mayores de 70 seleccione 4. Para finalizar el programa seleccione 0.');
+		readln(n);
+		if (n = 1) then crearArchivo(arc_log)
+		else if (n = 2) then BuscarNomAp(arc_log)
+		else if (n = 3) then ListarTodos(arc_log)
+		else if (n = 4) then BuscarMayores(arc_log)
+	end;
+	until (n = 0);
+end.
