@@ -27,5 +27,7 @@ begin
 		tot:= tot + 1;
 		suma:= suma + n;
 	end;
+	writeln('La cantidad de menores a 1500 fue de ', menores);
+	writeln('El promedio es de ', suma/tot);
 	close(arc_log);
 end.
