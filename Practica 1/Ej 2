@@ -1,0 +1,31 @@
+{2. Realizar un algoritmo, que utilizando el archivo de números enteros no ordenados creado en el ejercicio 1, informe por pantalla cantidad de números menores a 1500 y
+el promedio de los números ingresados. El nombre del archivo a procesar debe ser
+proporcionado por el usuario una única vez. Además, el algoritmo deberá listar el
+contenido del archivo en pantalla.}
+program creacion_archivo;
+const corte = 30000;
+type
+	archivo = file of integer;
+var
+	arc_log : archivo;
+	arc_fisico: string[10];
+	n,tot, suma, menores: integer;
+begin
+	write('Ingrese nombre del archivo ');
+	readln(arc_fisico);
+	assign(arc_log,arc_fisico);
+	reset(arc_log);
+	menores:= 0;
+	tot:= 0;
+	suma:= 0;
+	while (not(EOF(arc_log))) do begin
+		read(arc_log,n);
+		if(n < 1500) then begin
+			menores:= menores + 1;
+		end;
+		writeln(n);
+		tot:= tot + 1;
+		suma:= suma + n;
+	end;
+	close(arc_log);
+end.
