@@ -23,9 +23,19 @@ type
 			s_dis: integer;
 	end;
 	archivo = file of celular;
+procedure imprimir(cel: celular);
+begin
+	write('Codigo: ',cel.cod);
+	write(', Nombre: ',cel.nom);
+	write(', Descripcion: ',cel.desc);
+	write(', Marca: ',cel.marca);
+	write(', Precio: ',cel.precio);
+	write(', Stock Mínimo: ',cel.s_min);
+	writeln(', Stock Disponible: ',cel.s_dis);
+end;
 procedure CrearArc(var arc_log: archivo);
 var
-	arc_fis: string[10];
+	arc_fis: string;
 	cel: celular;
 	arc_tex: text;
 begin
@@ -36,21 +46,13 @@ begin
 	assign(arc_tex,'celulares.txt');
 	reset(arc_tex);
 	while not(EOF(arc_tex)) do begin
-		readln(arc_tex,cel.cod,cel.nom,cel.desc,cel.marca,cel.precio,cel.s_min,cel.s_dis);
+		readln(arc_tex, cel.cod, cel.precio, cel.marca);
+		readln(arc_tex, cel.s_dis, cel.s_min, cel.desc);
+		readln(arc_tex,cel.nom);
 		write(arc_log,cel);
 	end;
 	close(arc_log);
 	close(arc_tex);
-end;
-procedure imprimir(cel: celular);
-begin
-	write('Codigo: ',cel.cod);
-	write(', Nombre: ',cel.nom);
-	write(', Descripcion: ',cel.desc);
-	write(', Marca: ',cel.marca);
-	write(', Precio: ',cel.precio);
-	write(', Stock Mínimo: ',cel.s_min);
-	write(', Stock Disponible: ',cel.s_dis);
 end;
 procedure StockMenor(var arc_log: archivo);
 var
