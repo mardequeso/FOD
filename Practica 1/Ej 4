@@ -1,0 +1,222 @@
+{4. Agregar al menú del programa del ejercicio 3, opciones para:
+a. Añadir uno o más empleados al final del archivo con sus datos ingresados por teclado. Tener en cuenta que no se debe agregar al archivo un empleado con un número de
+empleado ya registrado (control de unicidad).
+b. Modificar la edad de un empleado dado.
+c. Exportar el contenido del archivo a un archivo de texto llamado “todos_empleados.txt”.
+d. Exportar a un archivo de texto llamado: “faltaDNIEmpleado.txt”, los empleados que no tengan cargado el DNI (DNI en 00).
+NOTA: Las búsquedas deben realizarse por número de empleado.}
+program creacion_archivo;
+const
+	corte = 'fin';
+type
+	empleado = record
+		id: integer;
+		ap: string[30];
+		nom: string [30];
+		edad: integer;
+		DNI: string[10];
+	end;
+	archivo = file of empleado;
+procedure leer(var e: empleado);
+begin
+	write('Ingrese nuevo apellido o fin para terminar con el registro de empleados: ');
+	readln(e.ap);
+	if(e.ap <> corte) then begin
+		write('Ingrese el id: ');
+		readln(e.id);
+		write('Ingrese el nombre: ');
+		readln(e.nom);
+		write('Ingrese la edad: ');
+		readln(e.edad);
+		write('Ingrese el DNI: ');
+		readln(e.DNI);
+	end;
+end;
+procedure crearArchivo (var arc_log: archivo);
+var
+	e: empleado;
+	arc_fis: string[10];
+begin
+	write('Ingrese nombre del archivo de empleados: ');
+	readln(arc_fis);
+	assign(arc_log,arc_fis);
+	rewrite(arc_log);
+	leer(e);
+	while(e.ap <> corte) do begin
+		write(arc_log,e);
+		leer(e);
+	end;
+	close(arc_log);
+end;
+procedure imprimir(e: empleado);
+begin
+	write('ID: ', e.id);
+	write(', Apellido: ', e.ap);
+	write(', Nombre: ', e.nom);
+	write(', Edad: ', e.edad);
+	writeln(', DNI: ', e.DNI);
+end;
+procedure ListarTodos(var arc_log: archivo);
+var
+	e: empleado;
+	arc_fis: string[10];
+begin
+	write('Ingrese nombre del archivo de empleados: ');
+	readln(arc_fis);
+	assign(arc_log,arc_fis);
+	reset(arc_log);
+	writeln('Listado de todos los empleados: ');
+	while not(EOF(arc_log)) do begin
+		read(arc_log,e);
+		imprimir(e);
+	end;
+	close(arc_log);
+end;
+procedure BuscarNomAp(var arc_log: archivo);
+var
+	arc_fis: string[10];
+	valor: string[30];
+	e: empleado;
+begin
+	write('Ingrese nombre del archivo de empleados: ');
+	readln(arc_fis);
+	assign(arc_log,arc_fis);
+	reset(arc_log);
+	write('Ingrese nombre o apellido a buscar: ');
+	readln(valor);
+	writeln('Listado de empleados con dicho nombre/apellido: ');
+	while not(EOF(arc_log)) do begin
+		read(arc_log,e);
+		if((e.nom = valor) or (e.ap = valor)) then imprimir(e);
+	end;
+	close(arc_log);
+end;
+procedure BuscarMayores(var arc_log: archivo);
+var
+	arc_fis: string[10];
+	e: empleado;
+begin
+	write('Ingrese nombre del archivo de empleados: ');
+	readln(arc_fis);
+	assign(arc_log,arc_fis);
+	reset(arc_log);
+	writeln('Listado de empleados mayores de 70: ');
+	while not(EOF(arc_log)) do begin
+		read(arc_log,e);
+		if(e.edad < 70) then imprimir(e);
+	end;
+	close(arc_log);
+end;
+function BuscarID(var arc_log: archivo; id: integer): boolean;
+var
+	encontre: boolean;
+	e: empleado;
+begin
+	reset(arc_log);
+	encontre:= false;
+	while (not(EOF) and not(encontre)) do begin
+		read(arc_log,e);
+		if(e.id = id) then encontre:= true;
+	end;
+	close(arc_log);
+	BuscarID:= encontre;
+end;
+procedure AgregarEmp (var arc_log: archivo);
+var
+	arc_fis: string[10];
+	e: empleado;
+begin
+	write('Ingrese nombre del archivo de empleados: ');
+	readln(arc_fis);
+	assign(arc_log,arc_fis);
+	reset(arc_log);
+	leer(e);
+	while(e.ap <> corte) do begin
+		if(BuscarID(arc_log,e.id)) then write(arc_log,e);
+		leer(e);
+	end;
+	close(arc_log);
+end;
+procedure CambiarEdad(var arc_log: archivo);
+var
+	arc_fis: string[10];
+	e: empleado;
+	encontre: boolean;
+	id: integer;
+begin
+	write('Ingrese nombre del archivo de empleados: ');
+	readln(arc_fis);
+	assign(arc_log,arc_fis);
+	reset(arc_log);
+	write('Ingrese id del empleado: ');
+	readln(id);
+	encontre:= false;
+	while (not(EOF(arc_log)) and not(encontre)) do begin
+		read(arc_log, e);
+		if(e.id = id) then begin
+			write('Ingrese la nueva edad: ');
+			readln(e.edad);
+			seek(arc_log,filePos(arc_log)-1);
+			write(arc_log,e);
+			encontre:= true;
+		end;
+	end;
+	close(arc_log);
+end;
+procedure PasarATexto(var arc_log: archivo);
+var
+	arc_fis: string[10];
+	e: empleado;
+	arc_tex: Text;
+begin
+	write('Ingrese nombre del archivo de empleados: ');
+	readln(arc_fis);
+	assign(arc_log,arc_fis);
+	reset(arc_log);
+	assign(arc_tex,'todos_empleados.txt');
+	rewrite(arc_tex);
+	while not(EOF(arc_log)) do begin
+		read(arc_log,e);
+		writeln(arc_tex,e.id,' ',e.ap,' ',e.nom,' ',e.edad,' ',e.DNI);
+	end;
+	close(arc_log);
+	close(arc_tex);
+end;
+procedure TextSinDNI(var arc_log: archivo);
+var
+	arc_fis: string[10];
+	e: empleado;
+	arc_tex: Text;
+begin
+	write('Ingrese nombre del archivo de empleados: ');
+	readln(arc_fis);
+	assign(arc_log,arc_fis);
+	reset(arc_log);
+	assign(arc_tex,'faltaDNIEmpleado.txt');
+	rewrite(arc_tex);
+	while not(EOF(arc_log)) do begin
+		read(arc_log,e);
+		if (e.DNI = '00') then writeln(arc_tex,e.id,' ',e.ap,' ',e.nom,' ',e.edad,' ',e.DNI);
+	end;
+	close(arc_log);
+	close(arc_tex);
+end;
+var
+	arc_log: archivo;
+	n: integer;
+begin
+	write('Bienvenido. ');
+	repeat begin
+		writeln('Para crear un archivo seleccione 1. Para listar empleados con un nombre/apellido específico seleccione 2. Para listar todos los empleados seleccione 3. Para listar todos los empleados mayores de 70 seleccione 4. Para agregar 1 o más empleados presione 5. Para modificar la edad de un empleado presione 6. Para exportar a un archivo de texto presione 7. Para crear un archivo de Texto con los empleados sin DNI presione 8. Para finalizar el programa seleccione 0.');
+		readln(n);
+		if (n = 1) then crearArchivo(arc_log)
+		else if (n = 2) then BuscarNomAp(arc_log)
+		else if (n = 3) then ListarTodos(arc_log)
+		else if (n = 4) then BuscarMayores(arc_log)
+		else if (n = 5) then AgregarEmp(arc_log)
+		else if (n = 6) then CambiarEdad(arc_log)
+		else if (n = 7) then PasarATexto(arc_log)
+		else if (n = 8) then TextSinDNI(arc_log)
+	end;
+	until (n = 0);
+end.
