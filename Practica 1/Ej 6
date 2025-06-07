@@ -1,0 +1,184 @@
+{6. Agregar al menú del programa del ejercicio 5, opciones para:
+a. Añadir uno o más celulares al final del archivo con sus datos ingresados por teclado.
+b. Modificar el stock de un celular dado.
+c. Exportar el contenido del archivo binario a un archivo de texto denominado: ”SinStock.txt”, con aquellos celulares que tengan stock 0.}
+program fod;
+type
+	celular = record
+			cod: integer;
+			nom: string;
+			desc: string;
+			marca: string;
+			precio: real;
+			s_min: integer;
+			s_dis: integer;
+	end;
+	archivo = file of celular;
+procedure SinStock(var arc_log: archivo);
+var
+	arc_fis: string;
+	c: celular;
+	texto: text;
+begin
+	write('Ingrese nombre del archivo: ');
+	readln(arc_fis);
+	assign(arc_log,arc_fis);
+	reset(arc_log);
+	assign(texto,'SinStock.txt');
+	rewrite(texto);
+	while not(EOF(arc_log)) do begin
+		read(arc_log,c);
+		if (c.s_dis = 0) then begin
+			writeln(texto,c.cod, ' ', c.precio, ' ',c.marca);
+			writeln(texto,c.s_dis, ' ', c.s_min, ' ',c.desc);
+			writeln(texto,c.nom);
+		end;
+	end;
+	close(arc_log);
+	close(texto);
+end;
+procedure ModificarStock (var arc_log:archivo);
+var
+	c:celular;
+	arc_fis: string;
+	encontre: boolean;
+	nom: string;
+begin
+	write('Ingrese nombre del archivo: ');
+	readln(arc_fis);
+	assign(arc_log,arc_fis);
+	reset(arc_log);
+	write('Ingrese nombre del cel a buscar: ');
+	readln(nom);
+	encontre:= false;
+	while (not (EOF(arc_log)) and not (encontre)) do begin
+		read(arc_log,c);
+		if (c.nom = nom) then begin
+			write('Ingrese nuevo stock: ');
+			readln(c.s_dis);
+			seek(arc_log,(filePos(arc_log)-1));
+			write(arc_log, c);
+			encontre:= true;
+		end;
+	end;
+	close(arc_log);
+end;
+procedure AniadirCel (var arc_log: archivo);
+var
+	c: celular;
+	arc_fis: string;
+	i: integer;
+begin
+	write('Ingrese nombre del archivo: ');
+	readln(arc_fis);
+	assign(arc_log,arc_fis);
+	reset(arc_log);
+	for i:= 1 to FileSize(arc_log) do read(arc_log,c);
+	write('Ingrese codigo o 999 para finalizar: ');
+	readln(c.cod);
+	while(c.cod <> 999) do begin
+		write('Ingrese nombre: ');
+		readln(c.nom);
+		write('Ingrese descripcion: ');
+		readln(c.desc);
+		write('Ingrese marca: ');
+		readln(c.marca);
+		write('Ingrese precio: ');
+		readln(c.precio);
+		write('Ingrese minimo: ');
+		readln(c.s_min);
+		write('Ingrese stock disponible: ');
+		readln(c.s_dis);
+		write(arc_log,c);
+		write('Ingrese codigo o 999 para finalizar: ');
+		readln(c.cod);
+	end;
+	close(arc_log);
+end;
+procedure imprimir(cel: celular);
+begin
+	write('Codigo: ',cel.cod);
+	write(', Nombre: ',cel.nom);
+	write(', Descripcion: ',cel.desc);
+	write(', Marca: ',cel.marca);
+	write(', Precio: ',cel.precio);
+	write(', Stock Mínimo: ',cel.s_min);
+	writeln(', Stock Disponible: ',cel.s_dis);
+end;
+procedure CrearArc(var arc_log: archivo);
+var
+	arc_fis: string;
+	cel: celular;
+	arc_tex: text;
+begin
+	write('Ingrese nombre del archivo: ');
+	readln(arc_fis);
+	assign(arc_log,arc_fis);
+	rewrite(arc_log);
+	assign(arc_tex,'celulares.txt');
+	reset(arc_tex);
+	while not(EOF(arc_tex)) do begin
+		readln(arc_tex, cel.cod, cel.precio, cel.marca);
+		readln(arc_tex, cel.s_dis, cel.s_min, cel.desc);
+		readln(arc_tex,cel.nom);
+		write(arc_log,cel);
+	end;
+	close(arc_log);
+	close(arc_tex);
+end;
+procedure StockMenor(var arc_log: archivo);
+var
+	arc_fis: string[10];
+	cel: celular;
+begin
+	write('Ingrese nombre del archivo: ');
+	readln(arc_fis);
+	assign(arc_log,arc_fis);
+	reset(arc_log);
+	writeln('Lista de celulares con stock disponible menor al minimo: ');
+	while not(EOF(arc_log)) do begin
+		read(arc_log,cel);
+		if(cel.s_min > cel.s_dis) then imprimir(cel);
+	end;
+end;
+procedure BuscarDesc(var arc_log: archivo);
+var
+	arc_fis: string[10];
+	cel: celular;
+	desc: string;
+begin
+	write('Ingrese nombre del archivo: ');
+	readln(arc_fis);
+	assign(arc_log,arc_fis);
+	reset(arc_log);
+	write('Ingrese descripcion a buscar: ');
+	readln(desc);
+	writeln('Lista de celulares con descripcion dada: ');
+	while not(EOF(arc_log)) do begin
+		read(arc_log,cel);
+		if(cel.desc = desc) then imprimir(cel);
+	end;
+end;
+var
+	arc_log: archivo;
+	n: integer;
+begin
+	write('Bienvenido. ');
+	repeat begin
+		writeln('Para crear un archivo seleccione 1.');
+		writeln('Para listar los celulares con stock disponible menor al mínimo seleccione 2.');
+		writeln('Para listar todos los celulares con una descripcion específica seleccione 3.');
+		writeln('Para añadir uno o más celulares seleccione 4.');
+		writeln('Para modificar el stock de un celular seleccione 5.');
+		writeln('Para crear un archivode texto para los celulares sin stock seleccione 6.');
+		writeln('Para finalizar el programa seleccione 0.');
+		readln(n);
+		if (n = 1) then CrearArc(arc_log)
+		else if (n = 2) then StockMenor(arc_log)
+		else if (n = 3) then BuscarDesc(arc_log)
+		else if (n = 4) then AniadirCel(arc_log)
+		else if (n = 5) then ModificarStock(arc_log)
+		else if (n = 6) then SinStock(arc_log)
+	end;
+	until (n = 0);
+end.
